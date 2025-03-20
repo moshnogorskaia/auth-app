@@ -7,9 +7,12 @@ import SignupScreen from "./screens/SignupScreen";
 import WelcomeScreen from "./screens/WelcomeScreen";
 import { Colors } from "./constants/styles";
 import AuthContextProvider from "./store/auth-context";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "./store/auth-context";
 import IconButton from "./components/ui/IconButton";
+import { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import AppLoading from "expo-app-loading";
 
 const Stack = createNativeStackNavigator();
 
@@ -65,12 +68,37 @@ function Navigation() {
 	);
 }
 
+function Root() {
+	const [isTryingLogin, setIsTryingLogin] = useState(true);
+	const authCtx = useContext(AuthContext);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		async function fetchToken() {
+			const storedToken = await AsyncStorage.getItem("token");
+
+			if (storedToken) {
+				authCtx.authenticate(storedToken);
+			}
+
+			setIsTryingLogin(false);
+		}
+
+		fetchToken();
+	}, []);
+
+	if (isTryingLogin) {
+		return <AppLoading />;
+	}
+
+	return <Navigation />;
+}
+
 export default function App() {
 	return (
 		<>
 			<StatusBar style="light" />
 			<AuthContextProvider>
-				<Navigation />
+				<Root />
 			</AuthContextProvider>
 		</>
 	);
