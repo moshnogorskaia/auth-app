@@ -4,7 +4,7 @@ import LoadingOverlay from "../components/ui/LoadingOverlay";
 import { login } from "../util/auth";
 import { Alert } from "react-native";
 import { useContext } from "react";
-import AuthContext from "../context/AuthContext";
+import { AuthContext } from "../store/auth-context";
 
 function LoginScreen() {
 	const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -17,9 +17,8 @@ function LoginScreen() {
 			authCtx.authenticate(token);
 		} catch (error) {
 			Alert.alert("Login failed", error.message);
+			setIsAuthenticating(false);
 		}
-
-		setIsAuthenticating(false);
 	}
 
 	if (isAuthenticating) {
